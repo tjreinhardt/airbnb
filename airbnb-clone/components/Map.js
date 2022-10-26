@@ -10,13 +10,14 @@ import { useEffect } from 'react';
 
 function Map({ searchResults }) {
 
+  const [selectedLocation, setSelectedLocation] = useState({});
   const coordinates = searchResults.map(result => ({
     longitude: result.long,
     latitude: result.lat,
   }))
 
   const center = getCenter(coordinates);
-  console.log(coordinates)
+  // console.log(coordinates)
 
   const [viewport, setViewport] = useState({
     width: '100%',
@@ -26,60 +27,8 @@ function Map({ searchResults }) {
     zoom: 11
   });
 
-  // const pins = useMemo(
-  //   () =>
-  //     searchResults.map((result) => (
-  //       <Marker
-  //         key={result.long}
-  //         longitude={result.long}
-  //         latitude={result.lat}
-  //         anchor="bottom"
-  //         onClick={e => {
-  //           e.originalEvent.stopPropagation();
-  //           setPopupInfo({ ...result })
-  //         }}>
-  //         <Pin />
-  //       </Marker>
-  //     )),
-  //   [searchResults]
-  // )
-
-
-  // const createFeatureCollection = (searchResults) => {
-  //   return {
-  //     "type": "FeatureCollection",
-  //     "features": searchResults.map((result) => {
-  //       return {
-  //         "type": "Feature",
-  //         "geometry": {
-  //           "type": "Point",
-  //           "coordinates": [result.long, result.lat]
-  //         }
-  //       }
-  //     })
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   createFeatureCollection(searchResults)
-  // }, [searchResults])
-
-
-
-  // console.log(searchResults, "searchResults")
-
-  // Transform search results object into
-  // { latitude: 52.516272, longitude: 13.132342} object
-
-
-
-
-
-
-  // const handleViewportChange = useCallback(
-  //   (viewport) => setViewport(viewport),
-  //   []
-  // );
+  console.log(selectedLocation, "selectedLocation")
+  console.log(coordinates, 'coordinates')
 
   return <ReactMapGL
     mapStyle="mapbox://styles/tjreinhardt/cl9pz7i0f000715maoqkoe14y"
@@ -87,26 +36,39 @@ function Map({ searchResults }) {
     {...viewport}
     onMove={evt => setViewport(evt.viewport)}
   >
-    {coordinates.map((result) => (
-      <div key={result.longitude}>
+    {searchResults.map((result) => (
+      <div key={result.long}>
         <Marker
-          latitude={result.latitude}
-          longitude={result.longitude}
+          latitude={result.lat}
+          longitude={result.long}
         // anchor="bottom"
         // offsetLeft={-20}
         // offsetTop={-10}
         >
           <p
-            role={'img'}
-            className='cursor-pointer text-2xl animate-bounce'>📍</p>
+            role='img'
+            onClick={() => setSelectedLocation(result)}
+            className='cursor-pointer text-2xl'
+            aria-label="push-pin"
+          >
+            📍
+          </p>
         </Marker>
+
+        {selectedLocation.long !== result.long ? (
+          <Popup
+            onClose={() => setSelectedLocation({})}
+            closeOnClick={true}
+            latitude={result.lat}
+            longitude={result.long}
+          >
+            {result.title}
+          </Popup>
+        ) : (
+          false
+        )}
       </div>
     ))}
-
-    <Marker longitude={-122.4376} latitude={37.7577}>
-      <div style={{ color: 'white' }}>You are here</div>
-    </Marker>
-    {/* {pins} */}
 
   </ReactMapGL>
 }
